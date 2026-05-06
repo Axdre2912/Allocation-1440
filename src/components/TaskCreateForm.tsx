@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
 
 type Props = {
   disabled: boolean
@@ -17,7 +17,7 @@ export function TaskCreateForm({ disabled, remainingBudgetMinutes, onCreate }: P
   const [totalXp, setTotalXp] = useState('45')
   const [totalWork, setTotalWork] = useState('')
 
-  function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
     const D = Math.max(1, Math.floor(Number(duration) || 0))
     const X = Math.max(0, Number(totalXp) || 0)
