@@ -18,6 +18,14 @@ export const TITLES: { minLevel: number; name: string }[] = [
   { minLevel: 121, name: 'Godlike' },
   { minLevel: 131, name: 'Divine II' },
   { minLevel: 141, name: 'Divine III' },
+  { minLevel: 151, name: 'Divine IV' },
+  { minLevel: 161, name: 'Divine V' },
+  { minLevel: 171, name: 'Divine VI' },
+  { minLevel: 181, name: 'Divine VII' },
+  { minLevel: 191, name: 'Divine VIII' },
+  { minLevel: 201, name: 'Divine IX' },
+  { minLevel: 211, name: 'Divine X' },
+  { minLevel: 221, name: 'Divine XI' },
 ]
 
 /** Level = floor(sqrt(Total_XP) / 5) + 1 */
