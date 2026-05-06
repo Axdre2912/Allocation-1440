@@ -6,7 +6,7 @@ import { RankToast } from './components/RankToast'
 import { TaskCreateForm } from './components/TaskCreateForm'
 import { TaskQueue } from './components/TaskQueue'
 import { getDayKey, MINUTES_PER_DAY } from './lib/date'
-import { levelFromTotalXp, titleForLevel } from './lib/gamification'
+import { clampEventXp, levelFromTotalXp, titleForLevel } from './lib/gamification'
 import { loadState, saveState } from './lib/storage'
 import {
   expandSlotsToTasks,
@@ -178,7 +178,7 @@ export default function App() {
         name: input.name,
         allocatedMinutes: D,
         rootWorkMinutes: W,
-        rootXpPool: input.rootXpPool,
+        rootXpPool: clampEventXp(input.rootXpPool),
         workRemainingMinutes: W,
         dayKey: todayKey,
         status: 'pending',

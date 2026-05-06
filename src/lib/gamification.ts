@@ -25,6 +25,12 @@ export const TITLES: { minLevel: number; name: string }[] = [
   { minLevel: 191, name: 'Zeus' },
 ]
 
+export const MAX_XP_PER_EVENT = 10_000
+
+export function clampEventXp(xp: number): number {
+  return Math.min(MAX_XP_PER_EVENT, Math.max(0, xp))
+}
+
 /** Level = floor(sqrt(Total_XP) / 5) + 1 */
 export function levelFromTotalXp(totalXp: number): number {
   if (totalXp < 0) return 1

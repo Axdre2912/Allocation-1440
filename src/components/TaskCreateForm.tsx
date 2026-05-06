@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MAX_XP_PER_EVENT, clampEventXp } from '../lib/gamification'
 
 type Props = {
   disabled: boolean
@@ -13,15 +14,26 @@ type Props = {
 
 export function TaskCreateForm({ disabled, remainingBudgetMinutes, onCreate }: Props) {
   const [name, setName] = useState('')
-  const [duration, setDuration] = useState('45')
+  const [durationHours, setDurationHours] = useState('0')
+  const [durationMinutes, setDurationMinutes] = useState('45')
   const [totalXp, setTotalXp] = useState('45')
-  const [totalWork, setTotalWork] = useState('')
+
+  const [totalWorkHours, setTotalWorkHours] = useState('')
+  const [totalWorkMinutes, setTotalWorkMinutes] = useState('')
+
+  function toWholeMinutes(hoursRaw: string, minutesRaw: string): number {
+    const h = Math.max(0, Math.floor(Number(hoursRaw) || 0))
+    const m = Math.max(0, Math.floor(Number(minutesRaw) || 0))
+    return h * 60 + m
+  }
 
   function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault()
-    const D = Math.max(1, Math.floor(Number(duration) || 0))
-    const X = Math.max(0, Number(totalXp) || 0)
-    const Wraw = totalWork.trim() === '' ? D : Math.floor(Number(totalWork) || 0)
+    const D = Math.max(1, toWholeMinutes(durationHours, durationMinutes))
+    const X = clampEventXp(Number(totalXp) || 0)
+    const hasCustomWork =
+      totalWorkHours.trim() !== '' || totalWorkMinutes.trim() !== ''
+    const Wraw = hasCustomWork ? toWholeMinutes(totalWorkHours, totalWorkMinutes) : D
     const W = Math.max(D, Wraw)
 
     if (!name.trim()) return
@@ -36,7 +48,7 @@ export function TaskCreateForm({ disabled, remainingBudgetMinutes, onCreate }: P
     setName('')
   }
 
-  const D = Math.max(1, Math.floor(Number(duration) || 0))
+  const D = Math.max(1, toWholeMinutes(durationHours, durationMinutes))
   const overBudget = D > remainingBudgetMinutes
 
   return (
@@ -45,7 +57,8 @@ export function TaskCreateForm({ disabled, remainingBudgetMinutes, onCreate }: P
         New task
       </h2>
       <p className="mt-1 text-xs text-slate-500">
-        XP accrues per minute. Timer uses deadline-based sync for accurate runs.
+        XP accrues per minute. Timer uses deadline-based sync for accurate runs. Max XP per
+        event: {MAX_XP_PER_EVENT.toLocaleString()}.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -63,14 +76,24 @@ export function TaskCreateForm({ disabled, remainingBudgetMinutes, onCreate }: P
 
         <label>
           <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-            Duration (min)
+            Duration (hours / min)
           </span>
-          <input
-            inputMode="numeric"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            className="w-full rounded-xl border border-cyber-border/80 bg-white px-3 py-2.5 font-mono text-sm text-slate-800 outline-none focus:border-cyber-cyan/50 focus:ring-2 focus:ring-cyber-cyan/40"
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              inputMode="numeric"
+              value={durationHours}
+              onChange={(e) => setDurationHours(e.target.value)}
+              placeholder="0 h"
+              className="w-full rounded-xl border border-cyber-border/80 bg-white px-3 py-2.5 font-mono text-sm text-slate-800 outline-none focus:border-cyber-cyan/50 focus:ring-2 focus:ring-cyber-cyan/40"
+            />
+            <input
+              inputMode="numeric"
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(e.target.value)}
+              placeholder="45 m"
+              className="w-full rounded-xl border border-cyber-border/80 bg-white px-3 py-2.5 font-mono text-sm text-slate-800 outline-none focus:border-cyber-cyan/50 focus:ring-2 focus:ring-cyber-cyan/40"
+            />
+          </div>
         </label>
 
         <label>
@@ -81,24 +104,34 @@ export function TaskCreateForm({ disabled, remainingBudgetMinutes, onCreate }: P
             inputMode="numeric"
             value={totalXp}
             onChange={(e) => setTotalXp(e.target.value)}
+            placeholder={`0-${MAX_XP_PER_EVENT}`}
             className="w-full rounded-xl border border-cyber-border/80 bg-white px-3 py-2.5 font-mono text-sm text-slate-800 outline-none focus:border-cyber-cyan/50 focus:ring-2 focus:ring-cyber-cyan/40"
           />
         </label>
 
         <label className="sm:col-span-2">
           <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-            Total work (min){' '}
+            Total work (hours / min){' '}
             <span className="font-normal normal-case text-slate-400">
               — optional; defaults to duration. Use for multi-day carryover.
             </span>
           </span>
-          <input
-            inputMode="numeric"
-            value={totalWork}
-            onChange={(e) => setTotalWork(e.target.value)}
-            placeholder={`${D}`}
-            className="w-full rounded-xl border border-cyber-border/80 bg-white px-3 py-2.5 font-mono text-sm text-slate-800 outline-none focus:border-cyber-cyan/50 focus:ring-2 focus:ring-cyber-cyan/40"
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              inputMode="numeric"
+              value={totalWorkHours}
+              onChange={(e) => setTotalWorkHours(e.target.value)}
+              placeholder="h (optional)"
+              className="w-full rounded-xl border border-cyber-border/80 bg-white px-3 py-2.5 font-mono text-sm text-slate-800 outline-none focus:border-cyber-cyan/50 focus:ring-2 focus:ring-cyber-cyan/40"
+            />
+            <input
+              inputMode="numeric"
+              value={totalWorkMinutes}
+              onChange={(e) => setTotalWorkMinutes(e.target.value)}
+              placeholder={`m (default ${D})`}
+              className="w-full rounded-xl border border-cyber-border/80 bg-white px-3 py-2.5 font-mono text-sm text-slate-800 outline-none focus:border-cyber-cyan/50 focus:ring-2 focus:ring-cyber-cyan/40"
+            />
+          </div>
         </label>
 
         <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3">
